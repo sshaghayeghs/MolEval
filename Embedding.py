@@ -10,6 +10,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel, PeftConfig
 from angle_emb import Prompts
 import deepchem as dc
+from rdkit import Chem
+
 class Embedding:
     def __init__(self):
         self.models = {
@@ -18,7 +20,8 @@ class Embedding:
             "sbert": self.sbert_embedding,
             "anglebert": self.anglebert_embedding,  # Add AngleBERT here
             "anglellama": self.angle_llama_embedding,  # Add AnglE here
-            "mol2vec": self.mol2vec_embedding
+            "mol2vec": self.mol2vec_embedding,
+            "morgan": self.morgan_embedding
 
         }
         self.model_name = "text-embedding-3-small"  # Replace with the actual model name
@@ -94,6 +97,11 @@ class Embedding:
         
     def mol2vec_embedding(self, texts):
         featurizer = dc.feat.Mol2VecFingerprint()
+        embeddings = featurizer.featurize(texts)
+        return embeddings
+
+    def morgan_embedding(self, texts):
+        featurizer = dc.feat.CircularFingerprint(size=2048, radius=3)
         embeddings = featurizer.featurize(texts)
         return embeddings
 
