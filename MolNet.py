@@ -1,4 +1,4 @@
-import deepchem as dc  # works with pip install --pre deepchem
+import deepchem as dc
 import pandas as pd
 from rdkit import Chem
 
@@ -11,12 +11,9 @@ def load_dataset(dataset_name):
     tasks, datasets, transformers = data
 
     dataset = datasets[0]
-    labels = [i[0] for i in dataset.y]
-    df = pd.DataFrame()
-    df['SMILES'] = dataset.X
-    df['LABELS'] = labels
+    
+    df = pd.DataFrame(dataset.X, columns=['SMILES'])
+    for i, task in enumerate(tasks):
+        df[task] = dataset.y[:, i]
+    
     return df
-
-df = load_dataset('bbbp')
-type_of_smiles = type(df['SMILES'].iloc[0])
-type_of_smiles
