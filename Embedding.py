@@ -18,8 +18,8 @@ class Embedding:
             "simcse": self.simcse_embedding,
             "chatgpt": self.chatgpt_embedding,
             "sbert": self.sbert_embedding,
-            "anglebert": self.anglebert_embedding,  # Add AngleBERT here
-            "anglellama": self.angle_llama_embedding,  # Add AnglE here
+            "anglebert": self.anglebert_embedding, 
+            "anglellama": self.angle_llama_embedding,  
             "mol2vec": self.mol2vec_embedding,
             "morgan": self.morgan_embedding
 
