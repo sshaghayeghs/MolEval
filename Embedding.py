@@ -9,7 +9,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel, PeftConfig
 from angle_emb import Prompts
-
+import deepchem as dc
 class Embedding:
     def __init__(self):
         self.models = {
@@ -17,7 +17,8 @@ class Embedding:
             "chatgpt": self.chatgpt_embedding,
             "sbert": self.sbert_embedding,
             "anglebert": self.anglebert_embedding,  # Add AngleBERT here
-            "anglellama": self.angle_llama_embedding  # Add AnglE here
+            "anglellama": self.angle_llama_embedding,  # Add AnglE here
+            "mol2vec": self.mol2vec_embedding
 
         }
         self.model_name = "text-embedding-3-small"  # Replace with the actual model name
@@ -89,6 +90,11 @@ class Embedding:
     def sbert_embedding(self, texts):
         model = SentenceTransformer("all-MiniLM-L6-v2")
         embeddings = model.encode(texts)
+        return embeddings
+        
+    def mol2vec_embedding(self, texts):
+        featurizer = dc.feat.Mol2VecFingerprint()
+        embeddings = featurizer.featurize(texts)
         return embeddings
 
     def get_embeddings(self, model_name, texts, api_key=None):
