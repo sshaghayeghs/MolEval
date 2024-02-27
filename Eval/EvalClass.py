@@ -1,46 +1,89 @@
+import os
+import json
 import numpy as np
+import pandas as pd
+
+# from whitening import whiten
+from validation import InnerKFoldClassifier
+
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 
-# Assuming InnerKFoldClassifier and its configuration is defined elsewhere
-from Eval.validation import InnerKFoldClassifier
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
 
-class Evaluation:
-    def __init__(self, X, y, classifier='mlp', kfold=5, random_state=1111):
-        # Validate inputs
-        if not isinstance(X, np.ndarray) or not isinstance(y, np.ndarray):
-            raise ValueError("X and y must be numpy arrays.")
+class Evlaution:
+    def __init__(self):
+        self.BASE_PATH = 'embeddings/'
+        eval_mlp = True
+        classifier = 'mlp' if eval_mlp else 'lr'
+        results = []
+        kfold = 5
         
-        self.classifier = classifier
-        self.kfold = kfold
-        self.X = X
-        self.y = y
-        self.nclasses = len(np.unique(y))
-        self.random_state = random_state
+        acc, acc_list = self.sentEval(X, y, kfold, classifier, nclasses, dataset, 'No Whitening', encoder)
+        print(f'\twhitening method:  : {acc}')
+        result = {  'classfier': classifier,
+                    'accuracy': acc,
+                    'accuracy_list': acc_list,
+                    'kfold': kfold
+                }
+        results.append(result)
 
-        # Perform evaluation
-        self.test_accuracy, self.test_f1, self.testresults_acc, self.testresults_f1 = self.sentEval()
 
-    def sentEval(self):
-        if self.classifier == 'mlp':
-            # Classifier configuration for 'mlp'
-            classifier_config = {
+    def sentEval(self, X, y, kfold, classifier, nclasses, dataset, whitening_method, encoder):
+        if(classifier == 'mlp'):
+            classifier = {
                 'nhid': 0,
                 'optim': 'rmsprop',
                 'batch_size': 128,
                 'tenacity': 3,
-                'epoch_size': 5,
-                'random_state': self.random_state  # Ensuring consistency in random state
+                'epoch_size': 5
             }
             config = {
-                'nclasses': self.nclasses,
-                'seed': self.random_state,  # Using consistent random state
+                'nclasses': nclasses,
+                'seed': 2,
                 'usepytorch': True,
-                'classifier': classifier_config,
-                'kfold': self.kfold
-            }
-            clf = InnerKFoldClassifier(self.X, self.y, config)
-            dev_accuracy, test_accuracy, testresults_acc, dev_f1, test_f1 = clf.run()
+                'classifier': classifier,
+                'nhid': classifier['nhid'],
+                'kfold': kfold            }
+            clf = InnerKFoldClassifier(X, y, config)
+            dev_accuracy, test_accuracy, testresults_acc, cm_data = clf.run()
+            
+        elif(classifier == 'lr'):
+            testresults_acc = []
+            regs = [2**t for t in range(-2, 4, 1)]
+            skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=1111)
+            innerskf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=1111)
 
-        return dev_accuracy, test_accuracy, testresults_acc, dev_f1, test_f1
+            for i, (train_idx, test_idx) in enumerate(skf.split(X, y)):
+                X_train, X_test = X[train_idx], X[test_idx]
+                y_train, y_test = y[train_idx], y[test_idx]
+                scores = []
+                for reg in regs:
+                    regscores = []
+                    for inner_train_idx, inner_test_idx in innerskf.split(X_train, y_train):
+                        X_in_train, X_in_test = X_train[inner_train_idx], X_train[inner_test_idx]
+                        y_in_train, y_in_test = y_train[inner_train_idx], y_train[inner_test_idx]
+                        clf = LogisticRegression(C=reg, random_state=0, max_iter=100000)
+                        clf.fit(X_in_train, y_in_train)
+                        score = clf.score(X_in_test, y_in_test)
+                        regscores.append(score)
+                    # print(f'\t L2={reg} , fold {i} of {kfold}, score {score}')
+                    scores.append(round(100*np.mean(regscores), 5))
+
+                optreg = regs[np.argmax(scores)]
+                # print('Best param found at split {0}:  L2 regularization = {1} with score {2}'.format(i, optreg, np.max(scores)))
+                clf = LogisticRegression(C=optreg, random_state=0, max_iter=100000)
+                clf.fit(X_train, y_train)
+
+                f_acc = round(100*clf.score(X_test, y_test), 2)
+                print(f'\taccuracy of {i} fold: {f_acc}')
+                testresults_acc.append(f_acc)
+            test_accuracy = round(np.mean(testresults_acc), 2)
+        else:
+            raise Exception("unknown classifier")
+
+        return test_accuracy, testresults_acc
+
