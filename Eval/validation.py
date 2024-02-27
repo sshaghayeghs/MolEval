@@ -6,7 +6,7 @@ import sklearn
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
-from classifier import MLP  # Replace this with your actual MLP classifier
+from Eval.classifier import MLP  # Replace this with your actual MLP classifier
 
 assert sklearn.__version__ >= "0.18.0", "Need to update sklearn to version >= 0.18.0"
 
@@ -93,7 +93,7 @@ class InnerKFoldClassifier(object):
         dev_f1_mean = np.mean(self.dev_f1_scores)
         test_f1_mean = np.mean(self.test_f1_scores)
 
-        return devaccuracy, testaccuracy, self.testresults, cm_data, dev_f1_mean, test_f1_mean
+        return devaccuracy, testaccuracy, self.testresults, dev_f1_mean, test_f1_mean
 
 # Example usage
 # X, y = load_your_data()
