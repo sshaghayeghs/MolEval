@@ -7,9 +7,7 @@ from sklearn.metrics import f1_score
 from validation import InnerKFoldClassifier
 
 class Evaluation:
-    def __init__(self, X, y, dataset, encoder, classifier='mlp', kfold=5):
-        self.dataset = dataset
-        self.encoder = encoder
+    def __init__(self, X, y, classifier='mlp', kfold=5):
         self.classifier = classifier
         self.kfold = kfold
         self.X = X
