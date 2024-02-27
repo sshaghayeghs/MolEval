@@ -1,10 +1,11 @@
+from re import X
 import os
 import json
 import numpy as np
 import pandas as pd
 
 # from whitening import whiten
-from validation import InnerKFoldClassifier
+from Eval.validation import InnerKFoldClassifier
 
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegression
@@ -14,25 +15,26 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 
-class Evlaution:
-    def __init__(self):
-        self.BASE_PATH = 'embeddings/'
-        eval_mlp = True
-        classifier = 'mlp' if eval_mlp else 'lr'
-        results = []
-        kfold = 5
-        
-        acc, acc_list = self.sentEval(X, y, kfold, classifier, nclasses, dataset, 'No Whitening', encoder)
-        print(f'\twhitening method:  : {acc}')
-        result = {  'classfier': classifier,
-                    'accuracy': acc,
-                    'accuracy_list': acc_list,
-                    'kfold': kfold
-                }
-        results.append(result)
+class Evaluation:
+    def __init__(self, X, y, eval_mlp=False):
+            self.X = X
+            self.y = y
+            self.eval_mlp = eval_mlp
+            self.classifier = 'mlp' if self.eval_mlp else 'lr'
+            self.results = []
+            self.kfold = 5
+            self.nclasses = len(np.unique(self.y))
+            
+            acc, acc_list = self.sentEval(self.X, self.y, self.kfold, self.classifier, self.nclasses)
+            result = {  'classifier': self.classifier,
+                        'accuracy': acc,
+                        'accuracy_list': acc_list,
+                        'kfold': self.kfold
+                    }
+            self.results.append(result)
 
 
-    def sentEval(self, X, y, kfold, classifier, nclasses, dataset, whitening_method, encoder):
+    def sentEval(self, X, y, kfold, classifier, nclasses):
         if(classifier == 'mlp'):
             classifier = {
                 'nhid': 0,
@@ -86,4 +88,3 @@ class Evlaution:
             raise Exception("unknown classifier")
 
         return test_accuracy, testresults_acc
-
