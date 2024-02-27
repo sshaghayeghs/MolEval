@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 import logging
 import numpy as np
-from classifier import MLP
+from Eval.classifier import MLP
 
 import sklearn
 assert (sklearn.__version__ >= "0.18.0"), \
