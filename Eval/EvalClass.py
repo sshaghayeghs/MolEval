@@ -43,43 +43,4 @@ class Evaluation:
             clf = InnerKFoldClassifier(self.X, self.y, config)
             dev_accuracy, test_accuracy, testresults_acc, dev_f1, test_f1 = clf.run()
 
-        elif self.classifier == 'lr':
-            testresults_acc = []
-            testresults_f1 = []
-            regs = [2**t for t in range(-2, 4, 1)]
-            skf = StratifiedKFold(n_splits=self.kfold, shuffle=True, random_state=self.random_state)
-
-            for train_idx, test_idx in skf.split(self.X, self.y):
-                X_train, X_test = self.X[train_idx], self.X[test_idx]
-                y_train, y_test = self.y[train_idx], self.y[test_idx]
-                scores = []
-                f1_scores = []
-
-                for reg in regs:
-                    regscores = []
-                    reg_f1_scores = []
-                    for inner_train_idx, inner_test_idx in skf.split(X_train, y_train):
-                        X_in_train, X_in_test = X_train[inner_train_idx], X_train[inner_test_idx]
-                        y_in_train, y_in_test = y_train[inner_train_idx], y_train[inner_test_idx]
-                        clf = LogisticRegression(C=reg, random_state=self.random_state, max_iter=100000)
-                        clf.fit(X_in_train, y_in_train)
-                        regscores.append(clf.score(X_in_test, y_in_test))
-                        y_pred_in_test = clf.predict(X_in_test)
-                        reg_f1_scores.append(f1_score(y_in_test, y_pred_in_test, average='weighted'))
-
-                    scores.append(round(100 * np.mean(regscores), 2))
-                    f1_scores.append(np.mean(reg_f1_scores))
-
-                optreg = regs[np.argmax(scores)]
-                clf = LogisticRegression(C=optreg, random_state=self.random_state, max_iter=100000)
-                clf.fit(X_train, y_train)
-                y_pred_test = clf.predict(X_test)
-                testresults_acc.append(round(100 * clf.score(X_test, y_test), 2))
-                testresults_f1.append(f1_score(y_test, y_pred_test, average='weighted'))
-
-            test_accuracy = round(np.mean(testresults_acc), 2)
-            test_f1 = np.mean(testresults_f1)
-        else:
-            raise ValueError(f"Unknown classifier type '{self.classifier}'. Supported classifiers are 'mlp' and 'lr'.")
-
-        return test_accuracy, test_f1, testresults_acc, testresults_f1
+        return dev_accuracy, test_accuracy, testresults_acc, dev_f1, test_f1
