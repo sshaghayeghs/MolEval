@@ -7,28 +7,35 @@ from sklearn.metrics import f1_score
 from Eval.validation import InnerKFoldClassifier
 
 class Evaluation:
-    def __init__(self, X, y, classifier='mlp', kfold=5):
+    def __init__(self, X, y, classifier='mlp', kfold=5, random_state=1111):
+        # Validate inputs
+        if not isinstance(X, np.ndarray) or not isinstance(y, np.ndarray):
+            raise ValueError("X and y must be numpy arrays.")
+        
         self.classifier = classifier
         self.kfold = kfold
         self.X = X
         self.y = y
         self.nclasses = len(np.unique(y))
+        self.random_state = random_state
 
         # Perform evaluation
         self.test_accuracy, self.test_f1, self.testresults_acc, self.testresults_f1 = self.sentEval()
 
     def sentEval(self):
         if self.classifier == 'mlp':
+            # Classifier configuration for 'mlp'
             classifier_config = {
                 'nhid': 0,
                 'optim': 'rmsprop',
                 'batch_size': 128,
                 'tenacity': 3,
-                'epoch_size': 5
+                'epoch_size': 5,
+                'random_state': self.random_state  # Ensuring consistency in random state
             }
             config = {
                 'nclasses': self.nclasses,
-                'seed': 2,
+                'seed': self.random_state,  # Using consistent random state
                 'usepytorch': True,
                 'classifier': classifier_config,
                 'kfold': self.kfold
@@ -40,7 +47,7 @@ class Evaluation:
             testresults_acc = []
             testresults_f1 = []
             regs = [2**t for t in range(-2, 4, 1)]
-            skf = StratifiedKFold(n_splits=self.kfold, shuffle=True, random_state=1111)
+            skf = StratifiedKFold(n_splits=self.kfold, shuffle=True, random_state=self.random_state)
 
             for train_idx, test_idx in skf.split(self.X, self.y):
                 X_train, X_test = self.X[train_idx], self.X[test_idx]
@@ -54,7 +61,7 @@ class Evaluation:
                     for inner_train_idx, inner_test_idx in skf.split(X_train, y_train):
                         X_in_train, X_in_test = X_train[inner_train_idx], X_train[inner_test_idx]
                         y_in_train, y_in_test = y_train[inner_train_idx], y_train[inner_test_idx]
-                        clf = LogisticRegression(C=reg, random_state=0, max_iter=100000)
+                        clf = LogisticRegression(C=reg, random_state=self.random_state, max_iter=100000)
                         clf.fit(X_in_train, y_in_train)
                         regscores.append(clf.score(X_in_test, y_in_test))
                         y_pred_in_test = clf.predict(X_in_test)
@@ -64,7 +71,7 @@ class Evaluation:
                     f1_scores.append(np.mean(reg_f1_scores))
 
                 optreg = regs[np.argmax(scores)]
-                clf = LogisticRegression(C=optreg, random_state=0, max_iter=100000)
+                clf = LogisticRegression(C=optreg, random_state=self.random_state, max_iter=100000)
                 clf.fit(X_train, y_train)
                 y_pred_test = clf.predict(X_test)
                 testresults_acc.append(round(100 * clf.score(X_test, y_test), 2))
@@ -73,8 +80,6 @@ class Evaluation:
             test_accuracy = round(np.mean(testresults_acc), 2)
             test_f1 = np.mean(testresults_f1)
         else:
-            raise ValueError("Unknown classifier type. Supported classifiers are 'mlp' and 'lr'.")
+            raise ValueError(f"Unknown classifier type '{self.classifier}'. Supported classifiers are 'mlp' and 'lr'.")
 
         return test_accuracy, test_f1, testresults_acc, testresults_f1
-
-
