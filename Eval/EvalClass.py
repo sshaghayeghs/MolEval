@@ -4,7 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 
 # Assuming InnerKFoldClassifier and its configuration is defined elsewhere
-from validation import InnerKFoldClassifier
+from Eval.validation import InnerKFoldClassifier
 
 class Evaluation:
     def __init__(self, X, y, classifier='mlp', kfold=5):
