@@ -9,5 +9,4 @@ peft
 angle-emb
 deepchem
 rdkit
-molfeat
 
