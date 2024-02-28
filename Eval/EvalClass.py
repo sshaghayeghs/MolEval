@@ -29,8 +29,8 @@ class Evaluation:
             
             acc, acc_list = self.sentEval(self.X, self.y, self.kfold, self.classifier, self.nclasses)
             result = {  'classifier': self.classifier,
-                        'accuracy': acc,
-                        'accuracy_list': acc_list,
+                        'auc': acc,
+                        'auc_list': acc_list,
                         'kfold': self.kfold
                     }
             self.results.append(result)
