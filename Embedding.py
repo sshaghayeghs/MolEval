@@ -108,6 +108,15 @@ class Embedding:
         return embeddings
         
     def pretrained_embedding(self, smiles, transformer_kind='Roberta-Zinc480M-102M'):
+        try:
+            chemgpt_local_dir = dm.fs.join(platformdirs.user_cache_dir("molfeat"), transformer_kind)
+            mapper = dm.fs.get_mapper(chemgpt_local_dir)
+            mapper.fs.delete(chemgpt_local_dir, recursive=True)
+        except FileNotFoundError:
+            pass
+    
+        # make sure we clear the cache of the HFModel function
+        HFModel._load_or_raise.cache_clear()
         transformer = PretrainedHFTransformer(kind=transformer_kind, notation='smiles', dtype=float)
         smiles_df = pd.DataFrame(smiles, columns=["smiles"])  # Convert to DataFrame
         embeddings = transformer(smiles_df)
