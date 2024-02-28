@@ -105,20 +105,21 @@ class Embedding:
         featurizer = dc.feat.CircularFingerprint(size=2048, radius=3)
         embeddings = featurizer.featurize(texts)
         return embeddings
-
+        
     def pretrained_embedding(self, smiles, transformer_kind='Roberta-Zinc480M-102M'):
         transformer = PretrainedHFTransformer(kind=transformer_kind, notation='smiles', dtype=float)
-        embeddings = transformer(pd.DataFrame(smiles))
+        smiles_df = pd.DataFrame(smiles, columns=["smiles"])  # Convert to DataFrame
+        embeddings = transformer(smiles_df)
         return embeddings
 
-
-    def get_embeddings(self, model_name, texts, api_key=None,transformer_kind='Roberta-Zinc480M-102M'):
+    def get_embeddings(self, model_name, texts, api_key=None, transformer_kind='Roberta-Zinc480M-102M'):
         if model_name in self.models:
             if model_name == "chatgpt" and api_key:
                 return self.models[model_name](texts, api_key)
-            if model_name == "pre-tarined":
-            return self.models[model_name](texts, transformer_kind)
-            return self.models[model_name](texts)
+            elif model_name == "pretrained":
+                return self.models[model_name](texts, transformer_kind)
+            else:
+                return self.models[model_name](texts)
         else:
             raise ValueError(f"Model {model_name} not supported.")
 
