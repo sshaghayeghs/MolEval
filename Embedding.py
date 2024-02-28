@@ -21,7 +21,8 @@ class Embedding:
             "anglebert": self.anglebert_embedding, 
             "anglellama": self.angle_llama_embedding,  
             "mol2vec": self.mol2vec_embedding,
-            "morgan": self.morgan_embedding
+            "morgan": self.morgan_embedding,
+            "pre-tarined": self.pretrained_embedding
 
         }
         self.model_name = "text-embedding-3-small"  # Replace with the actual model name
@@ -105,10 +106,18 @@ class Embedding:
         embeddings = featurizer.featurize(texts)
         return embeddings
 
-    def get_embeddings(self, model_name, texts, api_key=None):
+    def pretrained_embedding(self, smiles, transformer_kind='Roberta-Zinc480M-102M'):
+        transformer = PretrainedHFTransformer(kind=transformer_kind, notation='smiles', dtype=float)
+        embeddings = transformer(pd.DataFrame(smiles))
+        return embeddings
+
+
+    def get_embeddings(self, model_name, texts, api_key=None,transformer_kind='Roberta-Zinc480M-102M'):
         if model_name in self.models:
             if model_name == "chatgpt" and api_key:
                 return self.models[model_name](texts, api_key)
+            if model_name == "pre-tarined":
+            return self.models[model_name](texts, transformer_kind)
             return self.models[model_name](texts)
         else:
             raise ValueError(f"Model {model_name} not supported.")
