@@ -11,8 +11,13 @@ from peft import PeftModel, PeftConfig
 from angle_emb import Prompts
 import deepchem as dc
 from rdkit import Chem
+import datamol as dm
+import platformdirs
+import datamol as dm
+import os
 from molfeat.trans.pretrained.hf_transformers import PretrainedHFTransformer
 from molfeat.trans.pretrained.hf_transformers import HFModel
+import pandas as pd
 class Embedding:
     def __init__(self):
         self.models = {
