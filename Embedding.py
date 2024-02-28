@@ -11,12 +11,6 @@ from peft import PeftModel, PeftConfig
 from angle_emb import Prompts
 import deepchem as dc
 from rdkit import Chem
-import datamol as dm
-import platformdirs
-import datamol as dm
-import os
-from molfeat.trans.pretrained.hf_transformers import PretrainedHFTransformer
-from molfeat.trans.pretrained.hf_transformers import HFModel
 import pandas as pd
 class Embedding:
     def __init__(self):
@@ -27,8 +21,7 @@ class Embedding:
             "anglebert": self.anglebert_embedding, 
             "anglellama": self.angle_llama_embedding,  
             "mol2vec": self.mol2vec_embedding,
-            "morgan": self.morgan_embedding,
-            "pre-tarined": self.pretrained_embedding
+            "morgan": self.morgan_embedding
 
         }
         self.model_name = "text-embedding-3-small"  # Replace with the actual model name
@@ -112,29 +105,12 @@ class Embedding:
         embeddings = featurizer.featurize(texts)
         return embeddings
         
-    def pretrained_embedding(self, smiles, transformer_kind='Roberta-Zinc480M-102M'):
-        try:
-            chemgpt_local_dir = dm.fs.join(platformdirs.user_cache_dir("molfeat"), transformer_kind)
-            mapper = dm.fs.get_mapper(chemgpt_local_dir)
-            mapper.fs.delete(chemgpt_local_dir, recursive=True)
-        except FileNotFoundError:
-            pass
-    
-        # make sure we clear the cache of the HFModel function
-        HFModel._load_or_raise.cache_clear()
-        transformer = PretrainedHFTransformer(kind=transformer_kind, notation='smiles', dtype=float)
-        smiles_df = pd.DataFrame(smiles, columns=["smiles"])  # Convert to DataFrame
-        embeddings = transformer(smiles_df)
-        return embeddings
 
-    def get_embeddings(self, model_name, texts, api_key=None, transformer_kind='Roberta-Zinc480M-102M'):
+    def get_embeddings(self, model_name, texts, api_key=None):
         if model_name in self.models:
             if model_name == "chatgpt" and api_key:
                 return self.models[model_name](texts, api_key)
-            elif model_name == "pretrained":
-                return self.models[model_name](texts, transformer_kind)
-            else:
-                return self.models[model_name](texts)
+            return self.models[model_name](texts)
         else:
             raise ValueError(f"Model {model_name} not supported.")
 
