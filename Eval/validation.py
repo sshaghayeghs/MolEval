@@ -9,6 +9,7 @@ assert (sklearn.__version__ >= "0.18.0"), \
     "need to update sklearn to version >= 0.18.0"
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_auc_score
 
 def get_classif_name(classifier_config, usepytorch):
     if not usepytorch:
@@ -47,8 +48,7 @@ class InnerKFoldClassifier(object):
         regs = [10 ** t for t in range(-5, -1)] if self.usepytorch else \
             [2 ** t for t in range(-2, 4, 1)]
         skf = StratifiedKFold(n_splits=self.k, shuffle=True, random_state=1111)
-        innerskf = StratifiedKFold(n_splits=self.k, shuffle=True,
-                                   random_state=1111)
+        innerskf = StratifiedKFold(n_splits=self.k, shuffle=True, random_state=1111)
         count = 0
         for train_idx, test_idx in skf.split(self.X, self.y):
             count += 1
@@ -66,14 +66,18 @@ class InnerKFoldClassifier(object):
                                   seed=self.seed)
                         clf.fit(X_in_train, y_in_train,
                                 validation_data=(X_in_test, y_in_test))
+                        y_pred_proba = clf.predict_proba(X_in_test)
+                        score = roc_auc_score(y_in_test, y_pred_proba[:, 1])
                     else:
                         clf = LogisticRegression(C=reg, random_state=self.seed)
                         clf.fit(X_in_train, y_in_train)
-                    regscores.append(clf.score(X_in_test, y_in_test))
-                scores.append(round(100 * np.mean(regscores), 2))
+                        y_pred_proba = clf.predict_proba(X_in_test)[:, 1]
+                        score = roc_auc_score(y_in_test, y_pred_proba)
+                    regscores.append(score)
+                scores.append(np.mean(regscores))
             optreg = regs[np.argmax(scores)]
             logging.info('Best param found at split {0}: l2reg = {1} \
-                with score {2}'.format(count, optreg, np.max(scores)))
+                with AUC {2}'.format(count, optreg, np.max(scores)))
             self.devresults.append(np.max(scores))
 
             if self.usepytorch:
@@ -81,14 +85,16 @@ class InnerKFoldClassifier(object):
                           nclasses=self.nclasses, l2reg=optreg,
                           seed=self.seed)
                 clf.fit(X_train, y_train, validation_split=0.05)
+                y_pred_proba = clf.predict_proba(X_test)
+                test_auc = roc_auc_score(y_test, y_pred_proba[:, 1])
             else:
                 clf = LogisticRegression(C=optreg, random_state=self.seed)
                 clf.fit(X_train, y_train)
+                y_pred_proba = clf.predict_proba(X_test)[:, 1]
+                test_auc = roc_auc_score(y_test, y_pred_proba)
 
-            
-            self.testresults.append(round(100 * clf.score(X_test, y_test), 2))
+            self.testresults.append(test_auc)
 
-
-        devaccuracy = round(np.mean(self.devresults), 2)
-        testaccuracy = round(np.mean(self.testresults), 2)
-        return devaccuracy, testaccuracy, self.testresults
+        devauc = np.mean(self.devresults)
+        testauc = np.mean(self.testresults)
+        return devauc, testauc, self.testresults
