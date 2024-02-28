@@ -10,6 +10,8 @@ from Eval.validation import InnerKFoldClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import roc_auc_score
+
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -54,7 +56,7 @@ class Evaluation:
             dev_accuracy, test_accuracy, testresults_acc, cm_data = clf.run()
             
         elif(classifier == 'lr'):
-            testresults_acc = []
+            testresults_auc = []
             regs = [2**t for t in range(-2, 4, 1)]
             skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=1111)
             innerskf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=1111)
@@ -70,8 +72,10 @@ class Evaluation:
                         y_in_train, y_in_test = y_train[inner_train_idx], y_train[inner_test_idx]
                         clf = LogisticRegression(C=reg, random_state=0, max_iter=100000)
                         clf.fit(X_in_train, y_in_train)
-                        score = clf.score(X_in_test, y_in_test)
-                        regscores.append(score)
+                        #score = clf.score(X_in_test, y_in_test)
+                        y_pred_proba = clf.predict_proba(X_test)[:,1]
+                        f_auc = roc_auc_score(y_test, y_pred_proba)
+                        regscores.append(f_auc)
                     # print(f'\t L2={reg} , fold {i} of {kfold}, score {score}')
                     scores.append(round(100*np.mean(regscores), 5))
 
@@ -80,11 +84,14 @@ class Evaluation:
                 clf = LogisticRegression(C=optreg, random_state=0, max_iter=100000)
                 clf.fit(X_train, y_train)
 
-                f_acc = round(100*clf.score(X_test, y_test), 2)
-                print(f'\taccuracy of {i} fold: {f_acc}')
-                testresults_acc.append(f_acc)
-            test_accuracy = round(np.mean(testresults_acc), 2)
+                y_pred_proba = clf.predict_proba(X_test)[:,1]
+                f_auc = roc_auc_score(y_test, y_pred_proba)
+                print(f'\tAUC of {i} fold: {f_auc}')
+                testresults_auc.append(f_auc)
+
+            test_auc = round(np.mean(testresults_auc), 2)
+
         else:
             raise Exception("unknown classifier")
 
-        return test_accuracy, testresults_acc
+        return test_auc, testresults_auc
