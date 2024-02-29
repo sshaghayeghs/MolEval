@@ -3,6 +3,8 @@ import os
 import json
 import numpy as np
 import pandas as pd
+import random
+
 
 # from whitening import whiten
 from Eval.validation import InnerKFoldClassifier
@@ -58,8 +60,8 @@ class Evaluation:
         elif(classifier == 'lr'):
             testresults_auc = []
             regs = [2**t for t in range(-2, 4, 1)]
-            skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=1111)
-            innerskf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=1111)
+            skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=random.randint(1, 10000))
+            innerskf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=random.randint(1, 10000))
 
             for i, (train_idx, test_idx) in enumerate(skf.split(X, y)):
                 X_train, X_test = X[train_idx], X[test_idx]
@@ -70,7 +72,7 @@ class Evaluation:
                     for inner_train_idx, inner_test_idx in innerskf.split(X_train, y_train):
                         X_in_train, X_in_test = X_train[inner_train_idx], X_train[inner_test_idx]
                         y_in_train, y_in_test = y_train[inner_train_idx], y_train[inner_test_idx]
-                        clf = LogisticRegression(C=reg, random_state=0, max_iter=100000)
+                        clf = LogisticRegression(C=reg, random_state=random.randint(1, 10000), max_iter=10000)
                         clf.fit(X_in_train, y_in_train)
                         #score = clf.score(X_in_test, y_in_test)
                         y_pred_proba = clf.predict_proba(X_test)[:,1]
@@ -81,7 +83,7 @@ class Evaluation:
 
                 optreg = regs[np.argmax(scores)]
                 # print('Best param found at split {0}:  L2 regularization = {1} with score {2}'.format(i, optreg, np.max(scores)))
-                clf = LogisticRegression(C=optreg, random_state=0, max_iter=100000)
+                clf = LogisticRegression(C=optreg, random_state=random.randint(1, 10000), max_iter=10000)
                 clf.fit(X_train, y_train)
 
                 y_pred_proba = clf.predict_proba(X_test)[:,1]
