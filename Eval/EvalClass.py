@@ -75,8 +75,8 @@ class Evaluation:
                         clf = LogisticRegression(C=reg, random_state=random.randint(1, 10000), max_iter=10000)
                         clf.fit(X_in_train, y_in_train)
                         #score = clf.score(X_in_test, y_in_test)
-                        y_pred_proba = clf.predict_proba(X_test)[:,1]
-                        f_auc = roc_auc_score(y_test, y_pred_proba)
+                        y_in_pred_proba = clf.predict_proba(X_in_test)[:,1]
+                        f_auc = roc_auc_score(y_in_test, y_in_pred_proba)
                         regscores.append(f_auc)
                     # print(f'\t L2={reg} , fold {i} of {kfold}, score {score}')
                     scores.append(round(100*np.mean(regscores), 5))
