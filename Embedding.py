@@ -27,7 +27,7 @@ class EmbeddingExtractor:
             "anglebert": ("SeanLee97/angle-bert-base-uncased-nli-en-v1", AutoModel, AutoTokenizer),
             "sbert": SentenceTransformer("all-MiniLM-L6-v2"),
             "mol2vec": dc.feat.Mol2VecFingerprint(),
-            "morgan": dc.feat.CircularFingerprint(size=2048, radius=3)
+            "morgan": dc.feat.CircularFingerprint(size=1024, radius=2)
         }
         if hf_token:
             self.authenticate_huggingface(hf_token)
