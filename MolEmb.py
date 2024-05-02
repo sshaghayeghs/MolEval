@@ -21,7 +21,7 @@ class EmbeddingExtractor:
             "chemberta": ("DeepChem/ChemBERTa-10M-MLM", RobertaModel, RobertaTokenizer),
             "bert": ("bert-base-uncased", BertModel, BertTokenizer),
             "roberta_zinc": ("entropy/roberta_zinc_480m", RobertaModel, RobertaTokenizer),
-            "gpt2": ("entropy/gpt2_zinc_87m", GPT2LMHeadModel, GPT2TokenizerFast),
+            "gpt2_zinc": ("entropy/gpt2_zinc_87m", GPT2LMHeadModel, GPT2TokenizerFast),
             "roberta": ("FacebookAI/roberta-base", RobertaModel, RobertaTokenizer),
             "simcse": ("princeton-nlp/sup-simcse-bert-base-uncased", AutoModel, AutoTokenizer),
             "anglebert": ("SeanLee97/angle-bert-base-uncased-nli-en-v1", AutoModel, AutoTokenizer),
