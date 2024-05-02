@@ -22,14 +22,14 @@ df=load_dataset('bace_classification')
 df['SMILES'] = df['SMILES'].astype(str)
 ```
 ## 1.3. MolEmb 
-Available embedding model: `llama2, molformer, chemberta, bert, roberta_zinc, gpt2, roberta, simcse, anglebert, sbert, mol2vec, morgan`
+Available embedding model: `llama2, molformer, chemberta, bert, roberta_zinc, gpt2_zinc, roberta, simcse, anglebert, sbert, mol2vec, morgan`
 ```python
 import MolEmb
 hf_token = 'your_huuging_face_access_token'  # Replace with your actual HF token
 api_key = 'your_openai_api_key'  # Replace with your actual openai api key
 extractor = MolEmb.EmbeddingExtractor(hf_token=hf_token, api_key=api_key)
 smiles = df['SMILES'].to_list()
-emb = extractor.extract_features(smiles, "gpt2")
+emb = extractor.extract_features(smiles, "gpt2_zinc")
 print(emb)
 ```
 
