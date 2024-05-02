@@ -61,7 +61,6 @@ Please cite MolEval if you use it in your research:
 
 # 3. Related Works
 
-# 4. License
 
 
 
