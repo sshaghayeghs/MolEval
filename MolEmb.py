@@ -17,7 +17,7 @@ class EmbeddingExtractor:
         self.api_key = api_key
         self.models = {
             "llama2": ("meta-llama/Llama-2-7b-hf", LlamaModel, LlamaTokenizer),
-            "molformer": ("ibm/MoLFormer-XL-both-10pct", AutoModel, AutoTokenizer, True),  # Added a flag for trust_remote_code
+            "molformer": ("ibm/MoLFormer-XL-both-10pct", AutoModel, AutoTokenizer, True),  
             "chemberta": ("DeepChem/ChemBERTa-10M-MLM", RobertaModel, RobertaTokenizer),
             "bert": ("bert-base-uncased", BertModel, BertTokenizer),
             "roberta_zinc": ("entropy/roberta_zinc_480m", RobertaModel, RobertaTokenizer),
@@ -67,7 +67,7 @@ class EmbeddingExtractor:
                 embeddings = ((full_embeddings * mask.unsqueeze(-1)).sum(1) / mask.sum(-1).unsqueeze(-1))
             return embeddings.detach().cpu().numpy()
         else:  # Handle non-language models
-            return model.featurize(texts)  # Assuming texts are suitable for the model (e.g., SMILES strings for 'morgan')
+            return model.featurize(texts)  
 
     def sbert_embedding(self, texts):
         model = SentenceTransformer("all-MiniLM-L6-v2")
