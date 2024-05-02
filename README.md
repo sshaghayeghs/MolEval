@@ -58,10 +58,10 @@ print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
 # 2. How to cite
 Please cite MolEval if you use it in your research: 
 
-# 3. License
 
-# 4. Related Works
+# 3. Related Works
 
+# 4. License
 
 
 
