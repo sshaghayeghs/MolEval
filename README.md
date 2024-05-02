@@ -49,7 +49,7 @@ print(f'AUROC: {AUROC:.4f} +/- {AUROC_std:.4f}')
 If dataset in `lipo, freesolv, delaney`, use is evaluate_regression
 
 ```python
-from Eval import evaluate_regression
+from MolEval import evaluate_regression
 RMSE,RMSE_std,R2,R2_std=evaluate_regression(features=emb.to_numpy(), targets=df.drop(columns=['SMILES']).to_numpy(), n_splits=5)
 print(f'RMSE: {RMSE:.4f} +/- {RMSE_std:.4f}')
 print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
