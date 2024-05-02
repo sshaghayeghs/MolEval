@@ -53,5 +53,11 @@ RMSE,RMSE_std,R2,R2_std=evaluate_regression(features=emb.to_numpy(), targets=df.
 print(f'RMSE: {RMSE:.4f} +/- {RMSE_std:.4f}')
 print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
 ```
+# How to cite
+Please cite MolEval if you use it in your research: 
+
+# License
+
+
 
 
