@@ -17,17 +17,17 @@ Drawing on the precedents set by `SentEval`—a toolkit designed to assess sente
 ## Loading a Dataset
 Available datasets: `bbbp, bace_classifcation, hiv, tox21, clintox, sider, lipo, freesolv, delaney`
 ```python
-from MolNet import load_dataset
+from MolData import load_dataset
 df=load_dataset('bace_classification')
 df['SMILES'] = df['SMILES'].astype(str)
 ```
 ## MolEmb 
 Available embedding model: `llama2, molformer, chemberta, bert, roberta_zinc, gpt2, roberta, simcse, anglebert, sbert, mol2vec, morgan`
 ```python
-import Embedding
+import MolEmb
 hf_token = 'your_huuging_face_access_token'  # Replace with your actual HF token
 api_key = 'your_openai_api_key'  # Replace with your actual openai api key
-extractor = Embedding.EmbeddingExtractor(hf_token=hf_token, api_key=api_key)
+extractor = MolEmb.EmbeddingExtractor(hf_token=hf_token, api_key=api_key)
 smiles = df['SMILES'].to_list()
 emb = extractor.extract_features(smiles, "gpt2")
 print(emb)
@@ -39,7 +39,7 @@ If dataset in `bbbp, bace_classification, hiv`, task is `Classification`
 
 elif dataset in `delaney, sider, lipo`, task is `Multi-task Classification`
 ```python
-from Eval import evaluate_classification
+from MolEval import evaluate_classification
 f1_score,f1_score_std,AUROC,AUROC_std=evaluate_classification(features=emb.to_numpy(), targets=df.drop(columns=['SMILES']).to_numpy(), n_splits=5, task='Classification')
 print(f'F1 score: {f1_score:.4f} +/- {f1_score_std:.4f}')
 print(f'AUROC: {AUROC:.4f} +/- {AUROC_std:.4f}')
