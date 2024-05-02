@@ -15,7 +15,7 @@ Drawing on the precedents set by `SentEval`—a toolkit designed to assess sente
 ```
 
 ## 1.2. Loading a Dataset
-Available datasets: `bbbp, bace_classifcation, hiv, tox21, clintox, sider, lipo, freesolv, delaney`
+Available datasets from [MoleculeNet](https://moleculenet.org/datasets-1): `bbbp, bace_classifcation, hiv, tox21, clintox, sider, lipo, freesolv, delaney`
 ```python
 from MolData import load_dataset
 df=load_dataset('bace_classification')
