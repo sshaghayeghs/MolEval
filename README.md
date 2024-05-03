@@ -23,7 +23,7 @@ df=load_dataset('bace_classification')
 df['SMILES'] = df['SMILES'].astype(str)
 ```
 ## 1.3. MolEmb 
-Available embedding model: `llama2, molformer, chemberta, bert, roberta_zinc, gpt2_zinc, roberta, simcse, anglebert, sbert, mol2vec, morgan`
+Available embedding model: `llama2, molformer, chemberta, bert, roberta_zinc, roberta, simcse, anglebert, sbert, mol2vec, morgan`
 ```python
 import MolEmb
 hf_token = 'your_huuging_face_access_token'  # Replace with your actual HF token
