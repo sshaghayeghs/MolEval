@@ -38,7 +38,7 @@ print(emb)
 ### 1.4.1. Classification
 If dataset in `bbbp, bace_classification, hiv`, task is `Classification`
 
-elif dataset in `delaney, sider, lipo`, task is `MultitaskClassification`
+elif dataset in `tox21, clintox, sider`, task is `MultitaskClassification`
 ```python
 from MolEval import evaluate_classification
 f1_score,f1_score_std,AUROC,AUROC_std=evaluate_classification(features=emb.to_numpy(), targets=df.drop(columns=['SMILES']).to_numpy(), n_splits=5, task='Classification')
