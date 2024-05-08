@@ -56,11 +56,14 @@ print(f'RMSE: {RMSE:.4f} +/- {RMSE_std:.4f}')
 print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
 ```
 
-# 2. How to cite
-Please cite MolEval if you use it in your research: 
 
 
-# 3. Related Works
+# 2. Related Works
+
+  * [MTEB: Massive Text Embedding Benchmark](https://aclanthology.org/2023.eacl-main.148.pdf)
+  * [SentEval](https://aclanthology.org/L18-1269.pdf)
+  * [DeepChem](https://deepchem.readthedocs.io/en/latest/)
+  * [MolculeNet](https://pubs.rsc.org/en/content/articlelanding/2018/sc/c7sc02664a)
 
 
 
