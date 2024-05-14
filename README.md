@@ -56,8 +56,17 @@ print(f'RMSE: {RMSE:.4f} +/- {RMSE_std:.4f}')
 print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
 ```
 
+### 1.5. MolGraph
+```python
+from MolEval.MolGraph import MolGraph
+print(df['SMILES'][100])
+MolGraph(df['SMILES'][100])
+```
+`Clc1ccccc1-c1n(Cc2nc(N)ccc2)c(cc1)-c1ccc(Oc2cncnc2)cc1`
 
-
+<div align="center">
+  <img src="misc/molgraph.png" width="300" height="250" alt="MolEval Logo">
+</div>
 # 2. Related Works
 
   * [MTEB: Massive Text Embedding Benchmark](https://aclanthology.org/2023.eacl-main.148.pdf)
