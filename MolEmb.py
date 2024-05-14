@@ -66,7 +66,7 @@ class EmbeddingExtractor:
 
     def login_to_huggingface(self):
         if self.huggingface_token:
-            !huggingface-cli login --token {self.huggingface_token}
+            huggingface-cli login --token {self.huggingface_token}
         else:
             raise ValueError("Huggingface token is required for LLaMA2 model")
 
