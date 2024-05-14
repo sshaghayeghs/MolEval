@@ -20,17 +20,17 @@ Available datasets from [MoleculeNet](https://moleculenet.org/datasets-1): `bbbp
 ```python
 from MolData import load_dataset
 df=load_dataset('bace_classification')
-df['SMILES'] = df['SMILES'].astype(str)
 ```
 ## 1.3. MolEmb 
-Available embedding model: `llama2, molformer, chemberta, bert, roberta_zinc, roberta, simcse, anglebert, sbert, mol2vec, morgan`
+Available embedding model: `SBERT, LLaMA2, Molformer, ChemBERTa, BERT, RoBERTa_ZINC, RoBERTa, SimCSE, AngleBERT, GPT, Mol2Vec, Morgan`
 ```python
 import MolEmb
-hf_token = 'your_huuging_face_access_token'  # Replace with your actual HF token
-api_key = 'your_openai_api_key'  # Replace with your actual openai api key
-extractor = MolEmb.EmbeddingExtractor(hf_token=hf_token, api_key=api_key)
-smiles = df['SMILES'].to_list()
-emb = extractor.extract_features(smiles, "roberta_zinc")
+model_name = 'Morgan'  # Replace with the model you want to use
+openai_api_key = 'your_openai_api_key'  # Required if using GPT
+huggingface_token = 'your_huggingface_token'  # Required if using LLaMA2
+
+extractor = MolEmb.EmbeddingExtractor(model_name=model_name, df=df, openai_api_key=openai_api_key, huggingface_token=huggingface_token)
+emb, df = extractor.get_embeddings()
 print(emb)
 ```
 
