@@ -130,7 +130,7 @@ class ModelProcessor:
             except Exception as e:
                 self.errored_indices.append(i)
                 print(f"Error processing SMILES at index {i}: {sm}")
-                print(f"Error message: {str(e)})
+                print(f"Error message: {str(e)}")
 
     def get_morgan_fingerprint(self, smiles, radius=2, nBits=1024):
         mol = Chem.MolFromSmiles(smiles)
