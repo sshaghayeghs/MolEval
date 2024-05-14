@@ -18,13 +18,13 @@ Drawing on the precedents set by `SentEval`—a toolkit designed to assess sente
 ## 1.2. MolRead
 Available datasets from [MoleculeNet](https://moleculenet.org/datasets-1): `bbbp, bace_classifcation, hiv, tox21, clintox, sider, lipo, freesolv, delaney`
 ```python
-from MolData import load_dataset
+from MolEval.MolRead import load_dataset
 df=load_dataset('bace_classification')
 ```
 ## 1.3. MolEmb 
 Available embedding model: `SBERT, LLaMA2, Molformer, ChemBERTa, BERT, RoBERTa_ZINC, RoBERTa, SimCSE, AngleBERT, GPT, Mol2Vec, Morgan`
 ```python
-import MolEmb
+from MolEval import MolEmb 
 model_name = 'Morgan'  # Replace with the model you want to use
 openai_api_key = 'your_openai_api_key'  # Required if using GPT
 huggingface_token = 'your_huggingface_token'  # Required if using LLaMA2
@@ -40,7 +40,7 @@ If dataset in `bbbp, bace_classification, hiv`, task is `Classification`
 
 elif dataset in `tox21, clintox, sider`, task is `MultitaskClassification`
 ```python
-from MolEval import evaluate_classification
+from MolEval.MolEval import evaluate_classification
 f1_score,f1_score_std,AUROC,AUROC_std=evaluate_classification(features=emb.to_numpy(), targets=df.drop(columns=['SMILES']).to_numpy(), n_splits=5, task='Classification')
 print(f'F1 score: {f1_score:.4f} +/- {f1_score_std:.4f}')
 print(f'AUROC: {AUROC:.4f} +/- {AUROC_std:.4f}')
