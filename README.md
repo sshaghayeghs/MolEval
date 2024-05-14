@@ -56,7 +56,7 @@ print(f'RMSE: {RMSE:.4f} +/- {RMSE_std:.4f}')
 print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
 ```
 
-### 1.5. MolGraph
+## 1.5. MolGraph
 ```python
 from MolEval.MolGraph import MolGraph
 print(df['SMILES'][100])
