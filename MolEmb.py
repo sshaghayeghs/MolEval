@@ -10,7 +10,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 import subprocess
 
-class ModelProcessor:
+class EmbeddingExtractor:
     def __init__(self, model_name, df, openai_api_key=None, huggingface_token=None):
         self.model_name = model_name
         self.df = df
