@@ -8,8 +8,9 @@ import numpy as np
 import deepchem as dc
 from rdkit import Chem
 from rdkit.Chem import AllChem
+import subprocess
 
-class EmbeddingExtractor:
+class ModelProcessor:
     def __init__(self, model_name, df, openai_api_key=None, huggingface_token=None):
         self.model_name = model_name
         self.df = df
@@ -21,6 +22,8 @@ class EmbeddingExtractor:
         self.model = None
         self.all_embeddings = []
         self.errored_indices = []
+        
+        # Automatically call these methods on initialization
         self.select_model()
         self.process_smiles()
 
@@ -66,7 +69,7 @@ class EmbeddingExtractor:
 
     def login_to_huggingface(self):
         if self.huggingface_token:
-            huggingface-cli login --token {self.huggingface_token}
+            subprocess.run(['huggingface-cli', 'login', '--token', self.huggingface_token], check=True)
         else:
             raise ValueError("Huggingface token is required for LLaMA2 model")
 
@@ -117,17 +120,17 @@ class EmbeddingExtractor:
                 except Exception as e:
                     self.errored_indices.append(i)
                     print(f"Error processing SMILES at index {i}: {s}")
-                    print(f"Error message: {str(e)}")
+                    print(f"Error message: {str(e)})
 
     def _process_morgan(self):
-        for i, s in enumerate(self.smiles):
+        for i, sm in enumerate(self.smiles):
             try:
-                fp = self.get_morgan_fingerprint(s)
+                fp = self.get_morgan_fingerprint(sm)
                 self.all_embeddings.append(fp)
             except Exception as e:
                 self.errored_indices.append(i)
-                print(f"Error processing SMILES at index {i}: {s}")
-                print(f"Error message: {str(e)}")
+                print(f"Error processing SMILES at index {i}: {sm}")
+                print(f"Error message: {str(e)})
 
     def get_morgan_fingerprint(self, smiles, radius=2, nBits=1024):
         mol = Chem.MolFromSmiles(smiles)
