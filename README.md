@@ -67,6 +67,7 @@ MolGraph(df['SMILES'][100])
 <div align="center">
   <img src="misc/molgraph.png" width="300" height="250" alt="MolEval Logo">
 </div>
+
 # 2. Related Works
 
   * [MTEB: Massive Text Embedding Benchmark](https://aclanthology.org/2023.eacl-main.148.pdf)
