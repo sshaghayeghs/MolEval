@@ -15,7 +15,7 @@ Drawing on the precedents set by `SentEval`—a toolkit designed to assess sente
 
 ```
 
-## 1.2. Loading a Dataset
+## 1.2. MolRead
 Available datasets from [MoleculeNet](https://moleculenet.org/datasets-1): `bbbp, bace_classifcation, hiv, tox21, clintox, sider, lipo, freesolv, delaney`
 ```python
 from MolData import load_dataset
@@ -30,7 +30,7 @@ hf_token = 'your_huuging_face_access_token'  # Replace with your actual HF token
 api_key = 'your_openai_api_key'  # Replace with your actual openai api key
 extractor = MolEmb.EmbeddingExtractor(hf_token=hf_token, api_key=api_key)
 smiles = df['SMILES'].to_list()
-emb = extractor.extract_features(smiles, "gpt2_zinc")
+emb = extractor.extract_features(smiles, "roberta_zinc")
 print(emb)
 ```
 
