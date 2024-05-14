@@ -120,16 +120,16 @@ class ModelProcessor:
                 except Exception as e:
                     self.errored_indices.append(i)
                     print(f"Error processing SMILES at index {i}: {s}")
-                    print(f"Error message: {str(e)})
+                    print(f"Error message: {str(e)}")
 
     def _process_morgan(self):
-        for i, sm in enumerate(self.smiles):
+        for i, s in enumerate(self.smiles):
             try:
-                fp = self.get_morgan_fingerprint(sm)
+                fp = self.get_morgan_fingerprint(s)
                 self.all_embeddings.append(fp)
             except Exception as e:
                 self.errored_indices.append(i)
-                print(f"Error processing SMILES at index {i}: {sm}")
+                print(f"Error processing SMILES at index {i}: {s}")
                 print(f"Error message: {str(e)}")
 
     def get_morgan_fingerprint(self, smiles, radius=2, nBits=1024):
