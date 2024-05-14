@@ -11,7 +11,7 @@ Drawing on the precedents set by `SentEval`—a toolkit designed to assess sente
 ```python
 !git clone https://github.com/sshaghayeghs/MolEval
 !cd MolEval
-!pip install torch transformers pandas numpy tqdm openai deepchem rdkit
+!pip install torch transformers pandas numpy tqdm openai deepchem rdkit networkx matplotlib
 
 ```
 
