@@ -1,91 +1,144 @@
-import numpy as np
-import pandas as pd
-import torch
 from transformers import (
     AutoModel, AutoTokenizer, LlamaModel, LlamaTokenizer, RobertaModel, RobertaTokenizer,
-    BertModel, BertTokenizer, GPT2TokenizerFast, GPT2LMHeadModel, AutoModelForCausalLM
+    BertModel, BertTokenizer, AutoModelForCausalLM
 )
-from tqdm import tqdm
 import openai
-from sentence_transformers import SentenceTransformer
+import pandas as pd
+import numpy as np
 import deepchem as dc
 from rdkit import Chem
-from huggingface_hub import HfFolder
+from rdkit.Chem import AllChem
+
 class EmbeddingExtractor:
-    def __init__(self, hf_token=None, api_key=None):
-        self.hf_token = hf_token
-        self.api_key = api_key
-        self.models = {
-            "llama2": ("meta-llama/Llama-2-7b-hf", LlamaModel, LlamaTokenizer),
-            "molformer": ("ibm/MoLFormer-XL-both-10pct", AutoModel, AutoTokenizer, True),  
-            "chemberta": ("DeepChem/ChemBERTa-10M-MLM", RobertaModel, RobertaTokenizer),
-            "bert": ("bert-base-uncased", BertModel, BertTokenizer),
-            "roberta_zinc": ("entropy/roberta_zinc_480m", RobertaModel, RobertaTokenizer),
-            "gpt2_zinc": ("entropy/gpt2_zinc_87m", GPT2LMHeadModel, GPT2TokenizerFast),
-            "roberta": ("FacebookAI/roberta-base", RobertaModel, RobertaTokenizer),
-            "simcse": ("princeton-nlp/sup-simcse-bert-base-uncased", AutoModel, AutoTokenizer),
-            "anglebert": ("SeanLee97/angle-bert-base-uncased-nli-en-v1", AutoModel, AutoTokenizer),
-            "sbert": SentenceTransformer("all-MiniLM-L6-v2"),
-            "mol2vec": dc.feat.Mol2VecFingerprint(),
-            "morgan": dc.feat.CircularFingerprint(size=1024, radius=2)
-        }
-        if hf_token:
-            self.authenticate_huggingface(hf_token)
+    def __init__(self, model_name, df, openai_api_key=None, huggingface_token=None):
+        self.model_name = model_name
+        self.df = df
+        self.smiles = df['SMILES'].to_list()
+        self.target = df.drop(columns=['SMILES']).to_numpy()
+        self.openai_api_key = openai_api_key
+        self.huggingface_token = huggingface_token
+        self.tokenizer = None
+        self.model = None
+        self.all_embeddings = []
+        self.errored_indices = []
+        self.select_model()
+        self.process_smiles()
 
-    def authenticate_huggingface(self, token):
-        HfFolder.save_token(token)
-
-    def load_model_tokenizer(self, model_key):
-        if model_key in self.models:
-            item = self.models[model_key]
-            if isinstance(item, tuple):
-                if len(item) == 4:
-                    path, model_cls, tokenizer_cls, trust_remote = item
-                    model = model_cls.from_pretrained(path, trust_remote_code=trust_remote)
-                    tokenizer = tokenizer_cls.from_pretrained(path, trust_remote_code=trust_remote)
-                else:
-                    path, model_cls, tokenizer_cls = item
-                    model = model_cls.from_pretrained(path)
-                    tokenizer = tokenizer_cls.from_pretrained(path)
-                if model_key == "llama2":
-                    tokenizer.pad_token = tokenizer.eos_token
-                return model, tokenizer
-            else:
-                return item, None  # For feature extractors like 'morgan'
+    def select_model(self):
+        if self.model_name == 'SBERT':
+            self.tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+            self.model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+        elif self.model_name == 'LLaMA2':
+            self.login_to_huggingface()
+            self.tokenizer = LlamaTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+            self.model = LlamaModel.from_pretrained("meta-llama/Llama-2-7b-hf")
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+        elif self.model_name == 'Molformer':
+            self.tokenizer = AutoTokenizer.from_pretrained("ibm/MoLFormer-XL-both-10pct")
+            self.model = AutoModel.from_pretrained("ibm/MoLFormer-XL-both-10pct")
+        elif self.model_name == 'ChemBERTa':
+            self.tokenizer = RobertaTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+            self.model = RobertaModel.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+        elif self.model_name == 'BERT':
+            self.tokenizer = BertTokenizer.from_pretrained("google-bert/bert-base-uncased")
+            self.model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+        elif self.model_name == 'RoBERTa_ZINC':
+            self.tokenizer = RobertaTokenizer.from_pretrained("entropy/roberta_zinc_480m")
+            self.model = RobertaModel.from_pretrained("entropy/roberta_zinc_480m")
+        elif self.model_name == 'RoBERTa':
+            self.tokenizer = RobertaTokenizer.from_pretrained("FacebookAI/roberta-base")
+            self.model = RobertaModel.from_pretrained("FacebookAI/roberta-base")
+        elif self.model_name == 'SimCSE':
+            self.tokenizer = AutoTokenizer.from_pretrained("princeton-nlp/sup-simcse-bert-base-uncased")
+            self.model = AutoModel.from_pretrained("princeton-nlp/sup-simcse-bert-base-uncased")
+        elif self.model_name == 'AngleBERT':
+            self.tokenizer = AutoTokenizer.from_pretrained("SeanLee97/angle-bert-base-uncased-nli-en-v1")
+            self.model = AutoModel.from_pretrained("SeanLee97/angle-bert-base-uncased-nli-en-v1")
+        elif self.model_name == 'GPT':
+            openai.api_key = self.openai_api_key
+            self.client = openai.OpenAI(api_key=openai.api_key)
+        elif self.model_name == 'Mol2Vec':
+            self.featurizer = dc.feat.Mol2VecFingerprint()
+        elif self.model_name == 'Morgan':
+            pass
         else:
-            raise ValueError(f"Unsupported model key: {model_key}")
+            raise ValueError(f"Unknown model name: {self.model_name}")
 
-    def compute_embeddings(self, texts, model, tokenizer):
-        MAX_LENGTH = 512
-        embeddings = []
-        if tokenizer:
-            inputs = tokenizer(texts, return_tensors="pt", padding=True, truncation=True, max_length=MAX_LENGTH)
-            with torch.no_grad():
-                outputs = model(**inputs, output_hidden_states=True)
+    def login_to_huggingface(self):
+        if self.huggingface_token:
+            !huggingface-cli login --token {self.huggingface_token}
+        else:
+            raise ValueError("Huggingface token is required for LLaMA2 model")
+
+    def process_smiles(self):
+        if self.model_name in ['SBERT', 'LLaMA2', 'Molformer', 'ChemBERTa', 'BERT', 'RoBERTa_ZINC', 'RoBERTa', 'SimCSE', 'AngleBERT']:
+            self._process_transformers()
+        elif self.model_name == 'GPT':
+            self._process_gpt()
+        elif self.model_name == 'Mol2Vec':
+            self._process_mol2vec()
+        elif self.model_name == 'Morgan':
+            self._process_morgan()
+
+    def _process_transformers(self):
+        for i, smile in enumerate(self.smiles):
+            try:
+                inputs = self.tokenizer(smile, return_tensors="pt", padding='max_length', truncation=True, max_length=512)
+                outputs = self.model(**inputs, output_hidden_states=True)
                 full_embeddings = outputs.hidden_states[-1]
                 mask = inputs['attention_mask']
                 embeddings = ((full_embeddings * mask.unsqueeze(-1)).sum(1) / mask.sum(-1).unsqueeze(-1))
-            return embeddings.detach().cpu().numpy()
-        else:  # Handle non-language models
-            return model.featurize(texts)  
+                self.all_embeddings.append(embeddings.detach().cpu().numpy())
+            except Exception as e:
+                self.errored_indices.append(i)
+                print(f"Error processing SMILES at index {i}: {smile}")
+                print(f"Error message: {str(e)}")
 
-    def sbert_embedding(self, texts):
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        embeddings = model.encode(texts)
-        return embeddings
+    def _process_gpt(self):
+        for i, s in enumerate(self.smiles):
+            try:
+                response = self.client.embeddings.create(input=s, model="text-embedding-ada-002")
+                self.all_embeddings.append(response['data'][0]['embedding'])
+            except Exception as e:
+                self.errored_indices.append(i)
+                print(f"Error processing SMILES at index {i}: {s}")
+                print(f"Error message: {str(e)}")
 
-    def extract_features(self, texts, model_key):
-        if model_key in self.models:
-            if model_key == 'sbert':
-                embeddings = self.sbert_embedding(texts)
-            elif 'openai' in model_key:
-                embeddings = self.get_embeddings_from_openai(texts)
+    def _process_mol2vec(self):
+        for i, s in enumerate(self.smiles):
+            mol = Chem.MolFromSmiles(s)
+            if mol is None:
+                self.errored_indices.append(i)
+                print(f"Failed to create molecule from SMILES at index {i}: {s}")
             else:
-                model, tokenizer = self.load_model_tokenizer(model_key)
-                if tokenizer is None:  # Indicates a feature extractor like 'morgan'
-                    embeddings = model.featurize(texts)  # Assuming texts are SMILES strings for chemical features
-                else:
-                    embeddings = self.compute_embeddings(texts, model, tokenizer)
-            return pd.DataFrame(embeddings)
+                try:
+                    features = self.featurizer.featurize([mol])
+                    self.all_embeddings.append(features)
+                except Exception as e:
+                    self.errored_indices.append(i)
+                    print(f"Error processing SMILES at index {i}: {s}")
+                    print(f"Error message: {str(e)}")
+
+    def _process_morgan(self):
+        for i, s in enumerate(self.smiles):
+            try:
+                fp = self.get_morgan_fingerprint(s)
+                self.all_embeddings.append(fp)
+            except Exception as e:
+                self.errored_indices.append(i)
+                print(f"Error processing SMILES at index {i}: {s}")
+                print(f"Error message: {str(e)}")
+
+    def get_morgan_fingerprint(self, smiles, radius=2, nBits=1024):
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is not None:  
+            fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits)
+            return list(fp)
         else:
-            raise ValueError(f"Unsupported model key: {model_key}")
+            raise ValueError(f"Failed to create molecule from SMILES: {smiles}")
+
+    def get_embeddings(self):
+        squeezed_array = np.squeeze(self.all_embeddings)
+        emb = pd.DataFrame(squeezed_array)
+        filtered_df = self.df.drop(index=self.errored_indices).reset_index(drop=True)
+        return emb, filtered_df
