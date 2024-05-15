@@ -4,7 +4,14 @@
   <img src="misc/MolEval_FW.jpg" width="900" height="250" alt="MolEval Logo">
 </div>
 
-Drawing on the precedents set by `SentEval`—a toolkit designed to assess sentence embeddings— and `MoleculeNet`, a benchmark suite for molecular machine learning, we introduce MolEval. MolEval innovatively tackles the issue of evaluating large language models `(LLMs)` embeddings, which are traditionally expensive to execute on standard computing hardware. It achieves this by offering a repository of pre-computed `molecule embeddings`, alongside a versatile platform that facilitates the evaluation of any embeddings derived from molecular structures. This approach not only streamlines the assessment process but also makes it more accessible to researchers and practitioners in the field.
+Drawing on the precedents set by `SentEval`—a toolkit designed to assess sentence embeddings— and `MoleculeNet`, a benchmark suite for molecular machine learning, we introduce MolEval. MolEval innovatively tackles the issue of evaluating large language models `(LLMs)` embeddings, which are traditionally expensive to execute on standard computing hardware. It achieves this by offering a repository of pre-computed `molecule embeddings`, alongside a versatile platform that facilitates the evaluation of any embeddings derived from molecular structures. This approach not only streamlines the assessment process but also makes it more accessible to researchers and practitioners in the field. 
+
+The following are the features in this toolkit:
+
+  * :atom:	[MolRead](https://github.com/sshaghayeghs/MolEval?tab=readme-ov-file#12-molread)
+    * 	:heavy_plus_sign: MolGraph  
+  * 💻	MolEmb
+  * :balance_scale: MolEval
 # 1. Quick Start [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1AuqkCh7KLN2LWHPaKQdr-trvwDUdRhZ4?usp=sharing)
 
 ## 1.1. Install MolEval
@@ -21,6 +28,18 @@ Available datasets from [MoleculeNet](https://moleculenet.org/datasets-1): `bbbp
 from MolEval.MolRead import load_dataset
 df=load_dataset('bace_classification')
 ```
+### 1.2.1. MolGraph
+```python
+from MolEval.MolGraph import MolGraph
+print(df['SMILES'][100])
+MolGraph(df['SMILES'][100])
+```
+`Clc1ccccc1-c1n(Cc2nc(N)ccc2)c(cc1)-c1ccc(Oc2cncnc2)cc1`
+
+<div align="center">
+  <img src="misc/molgraph.png" width="300" height="250" alt="MolEval Logo">
+</div>
+
 ## 1.3. MolEmb 
 Available embedding model: `SBERT, LLaMA2, Molformer, ChemBERTa, BERT, RoBERTa_ZINC, RoBERTa, SimCSE, AngleBERT, GPT, Mol2Vec, Morgan`
 ```python
@@ -56,17 +75,7 @@ print(f'RMSE: {RMSE:.4f} +/- {RMSE_std:.4f}')
 print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
 ```
 
-## 1.5. MolGraph
-```python
-from MolEval.MolGraph import MolGraph
-print(df['SMILES'][100])
-MolGraph(df['SMILES'][100])
-```
-`Clc1ccccc1-c1n(Cc2nc(N)ccc2)c(cc1)-c1ccc(Oc2cncnc2)cc1`
 
-<div align="center">
-  <img src="misc/molgraph.png" width="300" height="250" alt="MolEval Logo">
-</div>
 
 # 2. Related Works
 
