@@ -9,9 +9,11 @@ Drawing on the precedents set by `SentEval`—a toolkit designed to assess sente
 The following are the features in this toolkit:
 
   * :atom:	[MolRead](https://github.com/sshaghayeghs/MolEval?tab=readme-ov-file#12-molread)
-    * 	:heavy_plus_sign: MolGraph  
-  * 💻	MolEmb
-  * :balance_scale: MolEval
+    * [MolGraph](https://github.com/sshaghayeghs/MolEval/blob/main/README.md#121-molgraph) 
+  * 💻	[MolEmb](https://github.com/sshaghayeghs/MolEval?tab=readme-ov-file#13-molemb)
+  * :balance_scale: [MolEval](https://github.com/sshaghayeghs/MolEval?tab=readme-ov-file#14-moleval)
+    * [Classification](https://github.com/sshaghayeghs/MolEval?tab=readme-ov-file#141-classification)
+    * [Regression](https://github.com/sshaghayeghs/MolEval?tab=readme-ov-file#142-regression)
 # 1. Quick Start [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1AuqkCh7KLN2LWHPaKQdr-trvwDUdRhZ4?usp=sharing)
 
 ## 1.1. Install MolEval
