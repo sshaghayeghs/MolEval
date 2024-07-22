@@ -87,5 +87,12 @@ print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
   * [MolculeNet](https://pubs.rsc.org/en/content/articlelanding/2018/sc/c7sc02664a)
 
 
+# 3. Citation
 
-
+```
+@inproceedings{sadeghi2024moleval,
+  title={MolEval: An Evaluation Toolkit for Molecular Embeddings via LLMs},
+  author={Sadeghi, Shaghayegh and Forooghi, Ali and Lu, Jianguo and Ngom, Alioune},
+  booktitle={ICML 2024 Workshop on Efficient and Accessible Foundation Models for Biological Discovery}
+}
+```
