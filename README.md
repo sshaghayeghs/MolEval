@@ -87,7 +87,9 @@ print(f'R2: {R2:.4f} +/- {R2_std:.4f}')
   * [MolculeNet](https://pubs.rsc.org/en/content/articlelanding/2018/sc/c7sc02664a)
 
 
-# 3. Citation
+# 3. Citation 
+[Link To Paper](https://openreview.net/attachment?id=DZ77ZqfcQG&name=pdf)
+
 
 ```
 @inproceedings{sadeghi2024moleval,
